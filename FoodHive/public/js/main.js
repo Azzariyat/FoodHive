@@ -407,6 +407,374 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+// Tambahkan fungsi-fungsi ini ke dalam file main.js yang sudah ada
+
+// FAQ Navigation and Integration
+const initFAQNavigation = () => {
+    // Update navigation highlighting for FAQ page
+    const currentPath = window.location.pathname;
+    const navLinks = document.querySelectorAll('.nav-link');
+    
+    navLinks.forEach(link => {
+        const href = link.getAttribute('href');
+        
+        // Remove active class from all links
+        link.classList.remove('active');
+        
+        // Add active class to current page
+        if ((currentPath.includes('faq') && href.includes('faq')) ||
+            (currentPath.includes('index') && href.includes('index')) ||
+            (currentPath === '/' && href.includes('index'))) {
+            link.classList.add('active');
+        }
+    });
+};
+
+// FAQ Search functionality (jika ada search box di FAQ)
+const initFAQSearch = () => {
+    const searchInput = document.getElementById('faq-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', function(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const faqItems = document.querySelectorAll('.faq-item');
+            let visibleCount = 0;
+            
+            faqItems.forEach(item => {
+                const question = item.querySelector('.faq-question').textContent.toLowerCase();
+                const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+                
+                if (question.includes(searchTerm) || answer.includes(searchTerm) || searchTerm === '') {
+                    item.style.display = 'block';
+                    item.style.opacity = '1';
+                    item.style.transform = 'translateY(0)';
+                    visibleCount++;
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+            
+            // Show "no results" message if no FAQ items match
+            showNoResultsMessage(visibleCount === 0 && searchTerm !== '');
+        });
+    }
+};
+
+// Show/hide no results message
+const showNoResultsMessage = (show) => {
+    let noResultsMsg = document.getElementById('no-results-message');
+    
+    if (show && !noResultsMsg) {
+        noResultsMsg = document.createElement('div');
+        noResultsMsg.id = 'no-results-message';
+        noResultsMsg.className = 'text-center py-5';
+        noResultsMsg.innerHTML = `
+            <div class="text-muted">
+                <i class="fas fa-search fa-3x mb-3"></i>
+                <h5>Tidak ada hasil yang ditemukan</h5>
+                <p>Coba gunakan kata kunci yang berbeda</p>
+            </div>
+        `;
+        
+        const faqContainer = document.querySelector('.faq-container');
+        if (faqContainer) {
+            faqContainer.appendChild(noResultsMsg);
+        }
+    } else if (!show && noResultsMsg) {
+        noResultsMsg.remove();
+    }
+};
+
+// FAQ Analytics (track which FAQ items are viewed)
+const trackFAQInteraction = () => {
+    const faqQuestions = document.querySelectorAll('.faq-question');
+    
+    faqQuestions.forEach((question, index) => {
+        question.addEventListener('click', function() {
+            // Track FAQ interaction (you can send this to analytics)
+            const faqTitle = this.textContent.trim();
+            console.log(`FAQ Clicked: ${faqTitle}`);
+            
+            // You can add analytics tracking here
+            // Example: gtag('event', 'faq_click', { 'faq_question': faqTitle });
+        });
+    });
+};
+
+// Add breadcrumb navigation
+const initBreadcrumb = () => {
+    const breadcrumbContainer = document.querySelector('.breadcrumb');
+    if (breadcrumbContainer) {
+        const currentPath = window.location.pathname;
+        const pathSegments = currentPath.split('/').filter(segment => segment);
+        
+        // Clear existing breadcrumb
+        breadcrumbContainer.innerHTML = '';
+        
+        // Create breadcrumb structure
+        const breadcrumbNav = document.createElement('nav');
+        breadcrumbNav.className = 'container';
+        
+        // Home link
+        const homeLink = document.createElement('a');
+        homeLink.href = pathSegments.includes('pages') ? '../index.html' : 'index.html';
+        homeLink.textContent = 'Beranda';
+        breadcrumbNav.appendChild(homeLink);
+        
+        // Add separator and current page
+        if (currentPath.includes('faq')) {
+            const separator = document.createElement('span');
+            separator.className = 'separator';
+            separator.textContent = ' > ';
+            breadcrumbNav.appendChild(separator);
+            
+            const current = document.createElement('span');
+            current.className = 'current';
+            current.textContent = 'FAQ';
+            breadcrumbNav.appendChild(current);
+        }
+        
+        breadcrumbContainer.appendChild(breadcrumbNav);
+    }
+};
+
+// Enhanced mobile menu for FAQ
+const initEnhancedMobileMenu = () => {
+    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    
+    if (mobileMenuToggle && mobileMenu) {
+        mobileMenuToggle.addEventListener('click', function() {
+            this.classList.toggle('active');
+            mobileMenu.classList.toggle('active');
+            document.body.classList.toggle('menu-open');
+        });
+        
+        // Close menu when clicking on link
+        const mobileLinks = mobileMenu.querySelectorAll('a');
+        mobileLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenuToggle.classList.remove('active');
+                mobileMenu.classList.remove('active');
+                document.body.classList.remove('menu-open');
+            });
+        });
+    }
+};
+
+// Back to top functionality
+const initBackToTop = () => {
+    const backToTopBtn = document.getElementById('back-to-top');
+    
+    if (backToTopBtn) {
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.style.display = 'block';
+                backToTopBtn.style.opacity = '1';
+            } else {
+                backToTopBtn.style.opacity = '0';
+                setTimeout(() => {
+                    if (window.pageYOffset <= 300) {
+                        backToTopBtn.style.display = 'none';
+                    }
+                }, 300);
+            }
+        });
+        
+        // Smooth scroll to top
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    }
+};
+
+// FAQ specific scroll animations
+const initFAQAnimations = () => {
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    if (faqItems.length > 0) {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    // Stagger animation
+                    setTimeout(() => {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }, index * 100);
+                    
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+        
+        // Initialize FAQ items for animation
+        faqItems.forEach((item, index) => {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(30px)';
+            item.style.transition = `opacity 0.6s ease ${index * 0.1}s, transform 0.6s ease ${index * 0.1}s`;
+            observer.observe(item);
+        });
+    }
+};
+
+// FAQ Print functionality
+const initFAQPrint = () => {
+    const printBtn = document.getElementById('print-faq');
+    
+    if (printBtn) {
+        printBtn.addEventListener('click', () => {
+            // Expand all FAQ items before printing
+            const faqAnswers = document.querySelectorAll('.faq-answer');
+            const faqQuestions = document.querySelectorAll('.faq-question');
+            
+            faqAnswers.forEach(answer => answer.classList.add('active'));
+            faqQuestions.forEach(question => question.classList.add('active'));
+            
+            // Print
+            window.print();
+            
+            // Collapse FAQ items after printing
+            setTimeout(() => {
+                faqAnswers.forEach(answer => answer.classList.remove('active'));
+                faqQuestions.forEach(question => question.classList.remove('active'));
+            }, 1000);
+        });
+    }
+};
+
+// FAQ Share functionality
+const initFAQShare = () => {
+    const shareBtn = document.getElementById('share-faq');
+    
+    if (shareBtn) {
+        shareBtn.addEventListener('click', async () => {
+            const shareData = {
+                title: 'FAQ - FoodHive',
+                text: 'Temukan jawaban untuk pertanyaan yang sering diajukan tentang FoodHive',
+                url: window.location.href
+            };
+            
+            try {
+                if (navigator.share) {
+                    await navigator.share(shareData);
+                } else {
+                    // Fallback: copy to clipboard
+                    await navigator.clipboard.writeText(window.location.href);
+                    showToast('Link FAQ berhasil disalin ke clipboard!', 'success');
+                }
+            } catch (err) {
+                console.error('Error sharing:', err);
+                // Fallback: copy to clipboard
+                try {
+                    await navigator.clipboard.writeText(window.location.href);
+                    showToast('Link FAQ berhasil disalin ke clipboard!', 'success');
+                } catch (clipboardErr) {
+                    showToast('Gagal membagikan FAQ', 'error');
+                }
+            }
+        });
+    }
+};
+
+// Update the main initialization function
+const initializeFAQFeatures = () => {
+    // Check if we're on FAQ page
+    if (window.location.pathname.includes('faq')) {
+        initFAQSearch();
+        initFAQAnimations();
+        initFAQPrint();
+        initFAQShare();
+        trackFAQInteraction();
+    }
+    
+    // These functions work on all pages
+    initFAQNavigation();
+    initBreadcrumb();
+    initEnhancedMobileMenu();
+    initBackToTop();
+};
+
+// Update the main DOMContentLoaded event listener
+document.addEventListener('DOMContentLoaded', () => {
+    // Existing functions
+    initSmoothScrolling();
+    initNavbarScroll();
+    initScrollAnimations();
+    initCounterAnimation();
+    initMobileMenu();
+    checkAuthStatus();
+    
+    // New FAQ functions
+    initializeFAQFeatures();
+});
+
+// Add keyboard navigation for FAQ
+document.addEventListener('keydown', (e) => {
+    if (window.location.pathname.includes('faq')) {
+        const faqQuestions = document.querySelectorAll('.faq-question');
+        const activeElement = document.activeElement;
+        
+        if (activeElement && activeElement.classList.contains('faq-question')) {
+            const currentIndex = Array.from(faqQuestions).indexOf(activeElement);
+            
+            switch (e.key) {
+                case 'ArrowDown':
+                    e.preventDefault();
+                    const nextIndex = (currentIndex + 1) % faqQuestions.length;
+                    faqQuestions[nextIndex].focus();
+                    break;
+                    
+                case 'ArrowUp':
+                    e.preventDefault();
+                    const prevIndex = currentIndex === 0 ? faqQuestions.length - 1 : currentIndex - 1;
+                    faqQuestions[prevIndex].focus();
+                    break;
+                    
+                case 'Enter':
+                case ' ':
+                    e.preventDefault();
+                    activeElement.click();
+                    break;
+            }
+        }
+    }
+});
+
+// FAQ URL handling for direct links to specific questions
+const handleFAQUrlHash = () => {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#faq-')) {
+        const faqId = hash.substring(1);
+        const faqAnswer = document.getElementById(faqId);
+        const faqQuestion = document.querySelector(`[data-faq="${faqId.split('-')[1]}"]`);
+        
+        if (faqAnswer && faqQuestion) {
+            // Open the specific FAQ
+            faqQuestion.classList.add('active');
+            faqAnswer.classList.add('active');
+            
+            // Scroll to the FAQ item
+            setTimeout(() => {
+                faqQuestion.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'center'
+                });
+            }, 300);
+        }
+    }
+};
+
+// Handle URL hash on page load and hash change
+window.addEventListener('load', handleFAQUrlHash);
+window.addEventListener('hashchange', handleFAQUrlHash);
 // Add CSS for ripple effect
 const style = document.createElement('style');
 style.textContent = `

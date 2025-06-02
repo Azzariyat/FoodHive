@@ -19,6 +19,7 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // Static files: frontend (CSS, JS, images, HTML)
 app.use(express.static(path.join(__dirname, 'public')));
@@ -30,6 +31,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/auth', authRoutes);
 app.use('/api/donations', donationRoutes);
 app.use('/api/User', userRoutes);
+app.use(express.static('pages'));
 
 // Test route
 app.get('/api/test', (req, res) => {
